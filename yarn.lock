@@ -3954,6 +3954,11 @@ uuid@^9.0.1:
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-9.0.1.tgz#e188d4c8853cc722220392c424cd637f32293f30"
   integrity sha512-b+1eJOlsR9K8HJpow9Ok3fiWOWSIcIzXodvv0rQjVoOVNpWMpxf1wZNpt4y9h10odCNrqnYp1OBzRktckBe3sA==
 
+v86@^0.4.0:
+  version "0.4.0"
+  resolved "https://registry.yarnpkg.com/v86/-/v86-0.4.0.tgz#58be25e0c6685675e50dcf3983635753659cd263"
+  integrity sha512-e4eOKJCiESxDn7CsVjmwdouUB05vSM+8JcNVZDVInLgXljY0siok6xJ1uX6wcoRhypzk56lOWOMwNk47w3QX0Q==
+
 vaul@^1.1.2:
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/vaul/-/vaul-1.1.2.tgz#c959f8b9dc2ed4f7d99366caee433fbef91f5ba9"

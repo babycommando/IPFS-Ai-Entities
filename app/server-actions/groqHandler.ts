@@ -1,5 +1,6 @@
 "use server";
 
+import { Message } from "@/components/chat";
 import Groq from "groq-sdk";
 
 // Initialize Groq with a secure API key
@@ -52,5 +53,83 @@ export async function checkPrompt(prompt: string) {
         );
       }
     }
+  }
+}
+
+export async function generateGroqJsonMessage(
+  prompt: string,
+  personality: string,
+  conversation: Message[]
+) {
+  const maxRetries = 3; // Set a maximum number of retries
+  let attempt = 0;
+
+  while (attempt < maxRetries) {
+    try {
+      attempt++;
+
+      const response = await groq.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: `
+            This is a chat room.
+
+            \n\nPersonality: ${personality}
+            \n\nUser Prompt: ${prompt}`,
+          },
+        ],
+        model: "llama3-8b-8192",
+      });
+
+      // Attempt to parse the response
+      const result = JSON.parse(response.choices[0]?.message?.content || "{}");
+
+      // If the response is valid, return it
+      if (result && typeof result === "object" && "authorize" in result) {
+        return result;
+      }
+
+      // If the response format is invalid, throw an error to retry
+      throw new Error("Invalid response format");
+    } catch (error) {
+      console.error(`Attempt ${attempt} failed:`, error);
+
+      if (attempt >= maxRetries) {
+        throw new Error(
+          "Failed to evaluate prompt after multiple attempts. Please try again."
+        );
+      }
+    }
+  }
+}
+
+export async function generateGroqMessage(
+  prompt: string,
+  personality: string,
+  conversation: Message[]
+) {
+  try {
+    const response = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "user",
+          content: `
+            You are an Ai.
+            Answer shortly, but boldly.
+            \n\nPersonality: ${personality}
+            \n\nUser Prompt: ${prompt}
+            \n\nConversation History: ${JSON.stringify(conversation)}
+            `,
+        },
+      ],
+      model: "llama3-8b-8192",
+    });
+
+    // Attempt to parse the response
+    const result = response.choices[0]?.message?.content;
+    return result;
+  } catch (error) {
+    throw new Error("Failed to create prompt. Please try again." + error);
   }
 }

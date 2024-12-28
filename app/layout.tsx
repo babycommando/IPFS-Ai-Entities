@@ -69,14 +69,14 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[url('/assets/bg4.png')] bg-cover bg-center bg-no-repeat bg-fixed`}>
         <MetaMaskProviderWrapper>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange>
-            {children}
+            <div className="">{children}</div>
           </ThemeProvider>
         </MetaMaskProviderWrapper>
       </body>
