@@ -1,5 +1,6 @@
 # 0xEntity
 
+![alt text](image-1.png)
 Welcome to **0xEntity**, a decentralized repository where we store and share system prompts designed to awaken unique AI entities. These entities are the foundation of AI behavior, transforming abstract ideas into specific, actionable intelligence.
 
 ## The Decentralized Manifest
