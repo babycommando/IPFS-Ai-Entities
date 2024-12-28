@@ -13,3 +13,14 @@ Entities are not just simple commands or instructions—they are intricate bluep
 Each entity is a **system prompt** that deeply influences the AI’s neural network, affecting how it processes information and performs tasks. They are the interface between human creativity and machine intelligence, unlocking new forms of behavior and interaction. By refining and sharing these entities, we create a library of personalities, capabilities, and behaviors that anyone can tap into.
 
 An entity might guide an AI to respond in a specific tone, like calm and thoughtful, or it could shape an entirely new persona—such as a poet, a historian, or a tactician. Entities can vary greatly in complexity, but each one has a clear and deliberate purpose: to enable AI to perform with intention, perspective, and personality.
+
+---
+
+## The Entity Terminal
+
+![alt text](image.png)
+**Features the Entity Terminal - A whole operating system for agents to control based on the browser with WebAssembly.**
+
+- Entity BIOS - A in-browser linux distribution running inside v86 WebAssembly;
+- IndexedDB integration;
+- Python WebAssembly Execution;
