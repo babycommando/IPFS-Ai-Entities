@@ -25,11 +25,7 @@ export type Message = {
   text: string;
 };
 
-type ChatRoomProps = {
-  initialPrompt: string;
-};
-
-const ChatRoom: React.FC<ChatRoomProps> = ({ initialPrompt }) => {
+const ChatRoom = ({ initialPrompt }: any) => {
   const router = useRouter();
 
   /*
