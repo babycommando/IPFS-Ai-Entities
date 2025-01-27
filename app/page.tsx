@@ -346,6 +346,24 @@ export default function Home() {
     setTimeout(() => setCopiedWallet(""), 2000);
   };
 
+  const handleButtonClick = async (systemPrompt: string | undefined) => {
+    try {
+      // Update the state (non-async, so no need for `await`)
+      setAgentState(systemPrompt);
+
+      // Simulate an async operation, like saving to localStorage
+      await new Promise((resolve) => {
+        localStorage.setItem("seed", systemPrompt || "");
+        resolve(true);
+      });
+
+      // Navigate to the "/bios" page
+      router.push("/bios");
+    } catch (error) {
+      console.error("Error during button click handling:", error);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -422,9 +440,7 @@ export default function Home() {
             </Card>
 
             {/* side card */}
-            {pageState === "summonedChat" ? (
-              <Bios />
-            ) : (
+            {pageState === "summonedChat" ? null : ( // <Bios />
               <Card className="w-full shadow-md mb-4">
                 <CardHeader>
                   <h2 className="text-2xl font-bold">
@@ -1143,8 +1159,11 @@ export default function Home() {
                     </p>
                   </div>
                   <Button
-                    onClick={() => {
-                      setPageState("summonedChat");
+                    // onClick={() => {
+                    //   setPageState("summonedChat");
+                    // }}
+                    onClick={async () => {
+                      await handleButtonClick(agentState);
                     }}
                     className="text-orange-400 h-8 text-xs bg-[#292929] hover:bg-[#353535] px-4 py-1 rounded-md">
                     <ScanEye />

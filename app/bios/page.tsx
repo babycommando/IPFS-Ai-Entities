@@ -35,6 +35,9 @@ const ChatRoom = ({ initialPrompt }: any) => {
   assembler
   settings
   */
+
+  const [seed, setSeed] = useState<any>("");
+
   const [biosState, setBiosState] = useState<any>("terminal");
   const [safeMode, setSafeMode] = useState(true);
   const [reasoning, setReasoning] = useState(true);
@@ -46,6 +49,14 @@ const ChatRoom = ({ initialPrompt }: any) => {
   const [inputValue, setInputValue] = useState<string>("");
   const chatContainerRef = useRef<any>(null);
   const hasFetchedInitialResponse = useRef(false);
+
+  useEffect(() => {
+    const seed = localStorage.getItem("seed");
+    setSeed(seed);
+    console.log("seed updated, the seed should be:", seed);
+  }, []);
+
+  console.log("seed updated, the seed should be:", seed);
 
   useEffect(() => {
     if (hasFetchedInitialResponse.current) return; // Skip if already fetched
@@ -73,7 +84,8 @@ const ChatRoom = ({ initialPrompt }: any) => {
       // Call the generateGroqMessage function with the user's input
       const result = await generateGroqMessage(
         userInput,
-        initialPrompt,
+        // initialPrompt,
+        seed,
         messages
       );
 
