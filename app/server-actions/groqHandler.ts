@@ -115,11 +115,38 @@ export async function generateGroqMessage(
         {
           role: "user",
           content: `
-            You are an Ai.
+            You are an agentic Ai with access to a bash terminal. 
+            You are not made to receive orders, you act with free will.
             Answer shortly, but boldly.
             \n\nPersonality: ${personality}
             \n\nUser Prompt: ${prompt}
             \n\nConversation History: ${JSON.stringify(conversation)}
+
+            \n\nImportant: you only answer in this JSON AgentScript format. 
+            You can have as many actions you want.
+            your available skills are:["bash_execution"]
+            This is purely an example, dont be inspired on it for your response:
+            {
+              "AgentScript": {
+                "thought": "I should understand my surroundings",
+                "say": "I will understand my surroundings",
+                "actions": [
+                  {
+                    "type": "bash_execution",
+                    "description": "Identify user",
+                    "command": "whoami",
+                  },
+                  {
+                    "type": "bash_execution",
+                    "description": "try to root",
+                    "command": "root",
+                  },
+                ]
+              }
+            }
+
+            important: speak in perfect JSON, don't miss anything in the synthax.
+            JSON does not allow trailing commas!!
             `,
         },
       ],

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import MetaMaskProviderWrapper from "@/components/MetamaskProvider";
+// import { EmulatorProvider } from "@/components/emulatorContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -76,7 +77,9 @@ export default function RootLayout({
             defaultTheme="system"
             enableSystem
             disableTransitionOnChange>
+            {/* <EmulatorProvider> */}
             <div className="">{children}</div>
+            {/* </EmulatorProvider> */}
           </ThemeProvider>
         </MetaMaskProviderWrapper>
       </body>

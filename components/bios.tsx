@@ -5,6 +5,7 @@ import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
 import { ScrollArea } from "./ui/scroll-area";
+import VMPage from "./emulator";
 
 const Bios = () => {
   const [inputValue, setInputValue] = useState<string>("");
@@ -16,14 +17,14 @@ const Bios = () => {
         <img src="assets/Entities.png" />
       </CardHeader>
       <CardContent className="flex flex-col justify-between overflow-hidden ">
-        <div className="flex gap-4 mb-8">
+        <div className="flex gap-4 mb-4">
           <p className="text-gray-200">Terminal</p>
           <p className="text-gray-200">IndexedDB</p>
           <p className="text-gray-200">Assembler</p>
         </div>
-        <div className=" flex flex-col w-full h-full rounded-lg text-pink-600 text-sm shadow-lg">
-          {/* Chat messages container */}
-          {/* <div className="flex-1 overflow-hidden"> */}
+        <div className="">{/* <VMPage /> */}</div>
+
+        {/* <div className=" flex flex-col w-full h-full rounded-lg text-pink-600 text-sm shadow-lg">
           <div
             className="h-72 overflow-y-auto p-2 bg-[#161616] rounded-sm
           [&::-webkit-scrollbar]:w-1.5
@@ -74,7 +75,7 @@ const Bios = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );

@@ -1,214 +1,225 @@
-// "use client";
-// import React, { useEffect, useRef } from "react";
-// //@ts-ignore
-// import { V86Starter } from "v86";
-
-// export default function V86Page() {
-//   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-//   useEffect(() => {
-//     (globalThis as any).DEBUG = false;
-
-//     // Ensure the canvas is defined
-//     if (!canvasRef.current) return;
-
-//     // Initialize the emulator
-//     const emulator = new V86Starter({
-//       wasm_path: "/v86/v86.wasm", // Path to v86.wasm in public/
-//       memory_size: 128 * 1024 * 1024, // e.g., 128MB
-//       vga_memory_size: 16 * 1024 * 1024, // e.g., 16MB
-
-//       // Pass the <canvas> element directly:
-//       screen_canvas: canvasRef.current,
-
-//       // BIOS + VGA + ISO paths (relative to public/)
-//       bios: { url: "/v86/bios/seabios.bin" },
-//       vga_bios: { url: "/v86/bios/vgabios.bin" },
-//       cdrom: { url: "/v86/images/alpine-virt.iso" },
-//       boot_order: 0x2,
-//       autostart: true,
-//     });
-
-//     // Optional: Listen for emulator readiness
-//     emulator.add_listener("emulator-ready", () => {
-//       console.log("v86 emulator is ready!");
-//     });
-
-//     // Cleanup
-//     return () => {
-//       emulator.stop();
-//     };
-//   }, []);
-
-//   // Render the canvas
-//   return (
-//     <div style={{ width: "800px", height: "600px" }}>
-//       <canvas
-//         ref={canvasRef}
-//         style={{ width: "100%", height: "100%", backgroundColor: "black" }}
-//       />
-//     </div>
-//   );
-// }
-
-// ----
-
-// "use client";
-
-// import React, { useEffect, useRef } from "react";
-
-// export default function V86Page() {
-//   // We'll provide an actual <canvas> for v86 to draw on
-//   const canvasRef = useRef<HTMLCanvasElement>(null);
-
-//   useEffect(() => {
-//     // 1) Create the script element
-//     const scriptEl = document.createElement("script");
-//     scriptEl.src = "/v86/libv86.js"; // Must match your /public path
-//     scriptEl.async = true;
-
-//     // 2) Onload -> use window.V86
-//     scriptEl.onload = () => {
-//       console.log("libv86.js loaded via dynamic script tag.");
-
-//       const V86Constructor = (window as any).V86;
-//       if (!V86Constructor) {
-//         console.error("window.V86 not found after script load.");
-//         return;
-//       }
-
-//       // 3) Create the emulator, explicitly passing `screen_canvas`
-//       const emulator = new V86Constructor({
-//         wasm_path: "/v86/v86.wasm",
-//         memory_size: 128 * 1024 * 1024, // 128MB
-//         vga_memory_size: 16 * 1024 * 1024, // 16MB
-
-//         // Provide a real <canvas> for v86 to use
-//         screen_canvas: canvasRef.current,
-
-//         bios: { url: "/v86/bios/seabios.bin" },
-//         vga_bios: { url: "/v86/bios/vgabios.bin" },
-//         cdrom: { url: "/v86/images/freedos.iso" },
-//         boot_order: 0x2,
-//         // Pass kernel command-line arguments:
-//         // cmdline: "console=tty0 console=ttyS0",
-//         autostart: true,
-//       });
-
-//       emulator.add_listener("serial0-output", (text: any) => {
-//         console.log("SERIAL0:", text);
-//       });
-
-//       emulator.add_listener("emulator-ready", () => {
-//         console.log("v86 emulator is ready!");
-//       });
-//     };
-
-//     scriptEl.onerror = (err) => {
-//       console.error("Error loading libv86.js:", err);
-//     };
-
-//     // 4) Append the <script> to <head>
-//     document.head.appendChild(scriptEl);
-
-//     // Cleanup on unmount? If you want:
-//     return () => {
-//       // If you want to stop the emulator or remove the script tag
-//       // emulator.stop();
-//       // document.head.removeChild(scriptEl);
-//     };
-//   }, []);
-
-//   return (
-//     <div style={{ position: "relative" }}>
-//       {/* Our dedicated <canvas> for v86 */}
-//       <canvas
-//         ref={canvasRef}
-//         width={800}
-//         height={600}
-//         style={{ border: "1px solid #ccc" }}
-//       />
-//     </div>
-//   );
-// }
-
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Input } from "./ui/input";
+import { Textarea } from "./ui/textarea";
+import { Card, CardContent } from "./ui/card";
+import { ScrollArea } from "./ui/scroll-area";
 
-export default function V86Page() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+declare global {
+  interface Window {
+    V86: any;
+  }
+}
+
+const VMPage = () => {
+  const screenContainerRef = useRef<HTMLDivElement>(null);
+  const outputRef = useRef<HTMLTextAreaElement>(null);
+  const logRef = useRef<HTMLTextAreaElement>(null);
+  const emulatorRef = useRef<any>(null);
+  const [output, setOutput] = useState<string>("");
+  const [inputValue, setInputValue] = useState<string>("");
 
   useEffect(() => {
-    const scriptEl = document.createElement("script");
-    scriptEl.src = "/v86/libv86.js";
-    scriptEl.async = true;
+    const script = document.createElement("script");
+    script.src = "/v86/libv86.js"; // Ensure this path is correct in your public directory
+    script.async = true;
 
-    scriptEl.onload = () => {
-      console.log("libv86.js loaded successfully.");
+    script.onload = () => {
+      if (window.V86 && screenContainerRef.current) {
+        const emulator = new window.V86({
+          wasm_path: "/v86/v86.wasm",
+          memory_size: 512 * 1024 * 1024,
+          vga_memory_size: 8 * 1024 * 1024,
+          screen_container: screenContainerRef.current,
+          bios: { url: "/v86/bios/seabios.bin" },
+          vga_bios: { url: "/v86/bios/vgabios.bin" },
+          cdrom: { url: "/v86/images/alpine-virt.iso" },
+          network_relay_url: "fetch",
+          autostart: true,
+        });
 
-      const V86Constructor = (window as any).V86;
-      if (!V86Constructor) {
-        console.error("V86 library not found on window.");
-        return;
-      }
+        emulatorRef.current = emulator;
 
-      const emulator = new V86Constructor({
-        wasm_path: "/v86/v86.wasm",
-        memory_size: 32 * 1024 * 1024, // 32MB
-        vga_memory_size: 4 * 1024 * 1024, // 4MB
-        bios: { url: "/v86/bios/seabios.bin" },
-        vga_bios: { url: "/v86/bios/vgabios.bin" },
-        cdrom: { url: "/v86/images/freedos.iso" }, // Minimal ISO
-        boot_order: 0x2, // Boot from CD-ROM
-        autostart: true,
-      });
+        // Ensure emulator is fully initialized
+        const restoreState = async () => {
+          if (emulator) {
+            try {
+              console.log("Attempting to restore state...");
+              // Fetch the state file as an ArrayBuffer
+              const response = await fetch("/v86/states/alpine-state.bin");
+              const state = await response.arrayBuffer(); // Get the state as ArrayBuffer
+              await emulator.restore_state(state); // Restore the state
+              console.log("State restored successfully.");
+            } catch (error) {
+              console.error("Failed to restore state:", error);
+            }
+          }
+        };
 
-      emulator.add_listener("emulator-ready", () => {
-        console.log("Emulator is ready!");
-        console.log("Memory Map Read8:", emulator.memory_map_read8);
-        if (!emulator.memory_map_read8) {
-          console.error("Memory map is not initialized correctly.");
-        }
-      });
+        // Only restore the state after the emulator is ready
+        restoreState();
 
-      emulator.add_listener("serial0-output", (text: any) => {
-        console.log("Serial0 Output:", text);
-      });
+        // Handling serial communication
+        let serialData = "";
+        const stages = [
+          {
+            test: "~% ",
+            send: "ls -1 --color=never /\n",
+          },
+          {
+            test: "~% ",
+            send: "echo Hello from VM\n",
+          },
+        ];
+        let stageIndex = 0;
 
-      emulator.add_listener("emulator-error", (err: any) => {
-        console.error("Emulator error:", err);
-      });
+        // Function to remove all ANSI escape codes
+        const removeAnsiCodes = (input: string) => {
+          // This regex will match most common ANSI escape codes (including cursor movement, colors, etc.)
+          return input.replace(/\x1b\[[0-9;]*[mGfHJKfF]/g, "");
+        };
 
-      // Ensure canvas is initialized
-      const ctx = canvasRef.current?.getContext("2d");
-      if (!ctx) {
-        console.error("Failed to initialize canvas context.");
+        // Updated serial output listener
+        emulator.add_listener("serial0-output-byte", (byte: number) => {
+          const char = String.fromCharCode(byte);
+          if (char === "\r") return;
+
+          serialData += char;
+
+          if (outputRef.current) {
+            // Clean the serial output by removing any ANSI escape codes before updating the textarea
+            const cleanedOutput = removeAnsiCodes(serialData);
+
+            outputRef.current.value = cleanedOutput;
+            outputRef.current.scrollTop = outputRef.current.scrollHeight;
+          }
+
+          const currentStage = stages[stageIndex];
+          if (currentStage && serialData.endsWith(currentStage.test)) {
+            emulator.serial0_send(currentStage.send);
+            if (logRef.current) {
+              logRef.current.value += `Sent command: ${currentStage.send}\n`;
+              logRef.current.scrollTop = logRef.current.scrollHeight;
+            }
+            stageIndex++;
+          }
+        });
+
+        emulator.add_listener("emulator-ready", () => {
+          if (logRef.current) {
+            logRef.current.value += "Emulator is ready.\n";
+            logRef.current.scrollTop = logRef.current.scrollHeight;
+          }
+        });
       } else {
-        console.log("Canvas context initialized.");
+        console.error(
+          "v86 library not loaded or screen container not initialized."
+        );
       }
     };
 
-    scriptEl.onerror = (err) => {
-      console.error("Error loading libv86.js:", err);
-    };
-
-    document.head.appendChild(scriptEl);
+    document.body.appendChild(script);
 
     return () => {
-      console.log("Cleaning up...");
-      document.head.removeChild(scriptEl);
+      document.body.removeChild(script);
     };
   }, []);
 
+  const sendCommand = (command: string) => {
+    const emulator = emulatorRef.current;
+    if (emulator) {
+      if (!emulator.is_running()) {
+        console.error("Emulator is not running yet.");
+        return;
+      }
+      try {
+        emulator.serial0_send(`${command}\n`);
+        if (logRef.current) {
+          logRef.current.value += `Command sent: ${command}\n`;
+          logRef.current.scrollTop = logRef.current.scrollHeight;
+        }
+      } catch (error) {
+        console.error("Error sending command:", error);
+      }
+    } else {
+      console.error("Emulator is not initialized yet.");
+    }
+  };
+
   return (
-    <div style={{ position: "relative" }}>
-      <canvas
-        ref={canvasRef}
-        width={800}
-        height={600}
-        style={{ border: "1px solid #ccc" }}
+    <div>
+      {/* <div style={{ marginTop: "10px" }}>
+        <button onClick={() => sendCommand("ls")}>Run "ls"</button>
+        <button onClick={() => sendCommand("echo Hello World")}>
+          Run "echo Hello World"
+        </button>
+        <button onClick={() => sendCommand("dmesg")}>Run "dmesg"</button>
+      </div> */}
+
+      {/* LOGGER */}
+      {/* <textarea
+        ref={logRef}
+        readOnly
+        rows={10}
+        style={{
+          marginTop: "20px",
+          width: "100%",
+          backgroundColor: "#111",
+          color: "#0f0",
+          fontFamily: "monospace",
+        }}
+        placeholder="Logs"
+      /> */}
+
+      {/* PINK TERM */}
+      <Textarea
+        ref={outputRef}
+        readOnly
+        rows={10}
+        className="text-pink-600 focus-visible:ring-0 text-sm h-72 overflow-y-auto p-2 bg-[#161616] rounded-sm
+            [&::-webkit-scrollbar]:w-1.5
+          [&::-webkit-scrollbar-thumb]:bg-[#1e1e1e]
+            [&::-webkit-scrollbar-track]:rounded-full
+            [&::-webkit-scrollbar-thumb]:rounded-full"
+        placeholder="Output"
       />
+
+      <div className="mt-4 w-full flex items-center rounded-xl ">
+        <Input
+          type="text"
+          className="flex-1 focus-visible:ring-0 focus:border-pink-600"
+          placeholder="$ ENTITY:>"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              sendCommand(inputValue);
+              setInputValue("");
+            }
+          }}
+        />
+      </div>
+
+      {/* BIG TERM */}
+      <div className="">
+        <div
+          id="screen_container"
+          ref={screenContainerRef}
+          className=""
+          style={{
+            font: "13px monospace",
+            lineHeight: "13px",
+            width: "100%",
+            zIndex: "10000",
+            // display: "none",
+          }}>
+          <ScrollArea className=""></ScrollArea>
+          <canvas style={{ display: "none" }}></canvas>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default VMPage;
